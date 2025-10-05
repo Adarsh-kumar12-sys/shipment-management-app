@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import { logoutSuccess } from '../store/slices/authSlice';
@@ -8,9 +7,11 @@ import { logoutSuccess } from '../store/slices/authSlice';
 const Navbar = () => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     dispatch(logoutSuccess());
+    navigate('/');
   };
 
   return (
