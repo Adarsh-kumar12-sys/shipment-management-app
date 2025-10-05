@@ -24,7 +24,7 @@ const ShipmentsPage = () => {
   const [open, setOpen] = useState(false);
   const [currentShipment, setCurrentShipment] = useState(null);
   const [page, setPage] = useState(currentPage);
-  const [limit, setLimit] = useState(10); // You can make this configurable
+  const [limit, setLimit] = useState(4); // You can make this configurable
   const [statusFilter, setStatusFilter] = useState('');
   const [searchKeyword, setSearchKeyword] = useState('');
 

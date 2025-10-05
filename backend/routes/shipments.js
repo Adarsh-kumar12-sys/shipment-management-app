@@ -27,7 +27,7 @@ router.post('/', auth, async (req, res) => {
 router.get('/', auth, async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page
+        const limit = parseInt(req.query.limit) || 4; // Default to 10 items per page
         const statusFilter = req.query.status; // Get status from query parameter
         const keyword = req.query.keyword; // Get keyword from query parameter
 
