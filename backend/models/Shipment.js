@@ -40,9 +40,27 @@ const ShipmentSchema = new mongoose.Schema({
 ShipmentSchema.pre('save', function (next) {
   // Example calculation: add a 10% fragile fee
   if (this.isFragile) {
-    this.totalCost = this.shippingCost * 1.1;
+    this.totalCost = Math.round((this.shippingCost * 1.1) * 100) / 100;
   } else {
     this.totalCost = this.shippingCost;
+  }
+  next();
+});
+
+
+// Middleware to calculate totalCost before updating
+ShipmentSchema.pre('findOneAndUpdate', async function (next) {
+  const update = this.getUpdate();
+  if (update.$set.shippingCost || update.$set.isFragile !== undefined) {
+    const docToUpdate = await this.model.findOne(this.getQuery());
+    const newShippingCost = update.$set.shippingCost || docToUpdate.shippingCost;
+    const newIsFragile = update.$set.isFragile !== undefined ? update.$set.isFragile : docToUpdate.isFragile;
+
+    if (newIsFragile) {
+      this.set({ totalCost: Math.round((newShippingCost * 1.1) * 100) / 100 });
+    } else {
+      this.set({ totalCost: newShippingCost });
+    }
   }
   next();
 });
