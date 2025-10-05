@@ -1,7 +1,8 @@
+
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getShipments, createShipment, updateShipmentById, deleteShipmentById } from '../store/slices/shipmentActions';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Modal, Box, Typography } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Modal, Box, Typography, Pagination, Select, MenuItem, InputLabel, FormControl, TextField } from '@mui/material';
 import ShipmentForm from '../components/ShipmentForm';
 
 const style = {
@@ -18,16 +19,26 @@ const style = {
 
 const ShipmentsPage = () => {
   const dispatch = useDispatch();
-  const { shipments, loading } = useSelector((state) => state.shipments);
+  const { shipments, loading, currentPage, totalPages } = useSelector((state) => state.shipments);
   const { isAuthenticated } = useSelector((state) => state.auth);
   const [open, setOpen] = useState(false);
   const [currentShipment, setCurrentShipment] = useState(null);
+  const [page, setPage] = useState(currentPage);
+  const [limit, setLimit] = useState(10); // You can make this configurable
+  const [statusFilter, setStatusFilter] = useState('');
+  const [searchKeyword, setSearchKeyword] = useState('');
 
   useEffect(() => {
     if (isAuthenticated) {
-      dispatch(getShipments());
+      const handler = setTimeout(() => {
+        dispatch(getShipments({ page, limit, status: statusFilter, keyword: searchKeyword }));
+      }, 500); // Debounce for 500ms
+
+      return () => {
+        clearTimeout(handler);
+      };
     }
-  }, [dispatch, isAuthenticated]);
+  }, [dispatch, isAuthenticated, page, limit, statusFilter, searchKeyword]);
 
   const handleOpen = (shipment = null) => {
     setCurrentShipment(shipment);
@@ -52,13 +63,52 @@ const ShipmentsPage = () => {
     dispatch(deleteShipmentById(id));
   };
 
+  const handlePageChange = (event, value) => {
+    setPage(value);
+  };
+
+  const handleStatusFilterChange = (event) => {
+    setStatusFilter(event.target.value);
+    setPage(1); // Reset to first page when filter changes
+  };
+
+  const handleSearchChange = (event) => {
+    setSearchKeyword(event.target.value);
+    setPage(1); // Reset to first page when search changes
+  };
+
   if (loading) {
     return <Typography>Loading...</Typography>;
   }
 
   return (
     <div>
-      <Button variant="contained" onClick={() => handleOpen()}>Add Shipment</Button>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Button variant="contained" onClick={() => handleOpen()}>Add Shipment</Button>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <TextField
+            label="Search Description"
+            variant="outlined"
+            value={searchKeyword}
+            onChange={handleSearchChange}
+            size="small"
+          />
+          <FormControl sx={{ minWidth: 120 }} size="small">
+            <InputLabel>Status</InputLabel>
+            <Select
+              value={statusFilter}
+              label="Status"
+              onChange={handleStatusFilterChange}
+            >
+              <MenuItem value="">All</MenuItem>
+              <MenuItem value="Pending">Pending</MenuItem>
+              <MenuItem value="In Transit">In Transit</MenuItem>
+              <MenuItem value="Delivered">Delivered</MenuItem>
+              <MenuItem value="Cancelled">Cancelled</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+      </Box>
       <Modal
         open={open}
         onClose={handleClose}
@@ -99,6 +149,14 @@ const ShipmentsPage = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+        <Pagination
+          count={totalPages}
+          page={page}
+          onChange={handlePageChange}
+          color="primary"
+        />
+      </Box>
     </div>
   );
 };

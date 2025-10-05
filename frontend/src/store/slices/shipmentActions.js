@@ -7,10 +7,17 @@ import { greenToast, redToast } from '../../utils/toastStyles';
 
 export const getShipments = createAsyncThunk(
   'shipments/getShipments',
-  async (_, { dispatch }) => {
+  async ({ page = 1, limit = 10, status = '', keyword = '' }, { dispatch }) => {
     dispatch(setLoading(true));
     try {
-      const res = await api.get('/shipments');
+      let url = `/shipments?page=${page}&limit=${limit}`;
+      if (status) {
+        url += `&status=${status}`;
+      }
+      if (keyword) {
+        url += `&keyword=${keyword}`;
+      }
+      const res = await api.get(url);
       dispatch(setShipments(res.data));
     } catch (err) {
       dispatch(setError(err.response.data));

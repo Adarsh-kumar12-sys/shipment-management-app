@@ -5,6 +5,9 @@ const initialState = {
   shipments: [],
   loading: false,
   error: null,
+  currentPage: 1,
+  totalPages: 1,
+  totalShipments: 0,
 };
 
 const shipmentSlice = createSlice({
@@ -15,7 +18,10 @@ const shipmentSlice = createSlice({
       state.loading = action.payload;
     },
     setShipments: (state, action) => {
-      state.shipments = action.payload;
+      state.shipments = action.payload.shipments;
+      state.currentPage = action.payload.currentPage;
+      state.totalPages = action.payload.totalPages;
+      state.totalShipments = action.payload.totalShipments;
     },
     addShipment: (state, action) => {
       state.shipments.push(action.payload);
